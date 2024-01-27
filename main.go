@@ -55,10 +55,17 @@ func main() {
 	// 	Peice:       100,
 	// })
 
-	changeBook := GetBook(db, 1)
+	// changeBook := GetBook(db, 1)
 
-	changeBook.Name = "Book 1 Updated"
-	changeBook.Author = "Author 1 Updated"
-	UpdateBook(db, changeBook)
+	// changeBook.Name = "Book 1 Updated"
+	// changeBook.Author = "Author 1 Updated"
+	// UpdateBook(db, changeBook)
+
+	books := SearchBook(db, "Book")
+	for _, book := range books {
+		fmt.Println(book)
+	}
+
+	// DeleteBook(db, 3)
 
 }
