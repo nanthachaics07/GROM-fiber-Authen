@@ -40,7 +40,6 @@ func main() {
 		panic(err)
 	}
 
-	db.Migrator().DropColumn(&Book{}, "publisher")
 	db.AutoMigrate(&Book{})
 	fmt.Println("Migrated! Successfully!")
 }
