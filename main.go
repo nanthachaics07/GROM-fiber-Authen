@@ -55,11 +55,10 @@ func main() {
 	// 	Peice:       100,
 	// })
 
-	UpdateBook(db, &Book{
-		Name:        "Book 3",
-		Author:      "Author 3",
-		Description: "Description 3",
-		Peice:       800,
-	})
+	changeBook := GetBook(db, 1)
+
+	changeBook.Name = "Book 1 Updated"
+	changeBook.Author = "Author 1 Updated"
+	UpdateBook(db, changeBook)
 
 }
