@@ -42,6 +42,7 @@ func UpdateBook(db *gorm.DB, book *Book) {
 
 func DeleteBook(db *gorm.DB, id uint) {
 	var book Book
+	// result := db.Unscoped().Delete(&book, id)
 	result := db.Delete(&book, id)
 	if result.Error != nil {
 		log.Fatalf("Error deleting book: %v", result.Error)
