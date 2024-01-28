@@ -42,12 +42,22 @@ func GetAllBooks(db *gorm.DB) []Book {
 	return books
 }
 
-func UpdateBook(db *gorm.DB, book *Book) {
+func UpdateBook(db *gorm.DB, book *Book) error {
 	result := db.Save(book)
 	if result.Error != nil {
 		log.Fatalf("Error updating book: %v", result.Error)
 	}
 	fmt.Println("Book updated successfully")
+	return nil
+}
+
+func UpdateDateBook(db *gorm.DB, book *Book) error {
+	result := db.Model(&book).Updates(book)
+	if result.Error != nil {
+		log.Fatalf("Error updating book: %v", result.Error)
+	}
+	fmt.Println("Book updated successfully")
+	return nil
 }
 
 func DeleteBook(db *gorm.DB, id uint) {

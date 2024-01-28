@@ -81,6 +81,40 @@ func main() {
 		return c.JSON(book)
 	})
 
+	app.Put("/update-books/:id", func(c *fiber.Ctx) error {
+		id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		book := new(Book)
+		if err := c.BodyParser(book); err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		book.ID = uint(id)
+		err = UpdateBook(db, book)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		return c.SendStatus(200)
+	})
+
+	app.Put("/update-date-books/:id", func(c *fiber.Ctx) error {
+		id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		book := new(Book)
+		if err := c.BodyParser(book); err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		book.ID = uint(id)
+		err = UpdateDateBook(db, book)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		return c.SendStatus(200)
+	})
+
 	app.Delete("/delete-books/:id", func(c *fiber.Ctx) error {
 		id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 		if err != nil {
