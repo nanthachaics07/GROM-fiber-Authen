@@ -32,6 +32,15 @@ func GetBook(db *gorm.DB, id uint) *Book {
 	return &book
 }
 
+func GetAllBooks(db *gorm.DB) []Book {
+	var books []Book
+	result := db.Find(&books)
+	if result.Error != nil {
+		log.Fatalf("Error finding books: %v", result.Error)
+	}
+	return books
+}
+
 func UpdateBook(db *gorm.DB, book *Book) {
 	result := db.Save(book)
 	if result.Error != nil {

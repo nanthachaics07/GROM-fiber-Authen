@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -45,8 +46,16 @@ func main() {
 	}
 	defer sqlDB.Close()
 
+	app := fiber.New()
+
 	db.AutoMigrate(&Book{})
 	fmt.Println("Migrated! Successfully!")
+
+	app.Get("/books", func(c *fiber.Ctx) error {
+		return c.JSON(GetAllBooks(db))
+	})
+
+	app.Listen(":8080")
 
 	// CreateBook(db, &Book{
 	// 	Name:        "Book 1",
