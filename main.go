@@ -24,21 +24,22 @@ const (
 
 func authenticationRequired(c *fiber.Ctx) error {
 	cookie := c.Cookies("jwt")
-	token, err := jwt.ParseWithClaims(cookie, &jwt.RegisteredClaims{},
+	token, err := jwt.ParseWithClaims(cookie, &jwt.MapClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET_KEY")), nil
 		})
-	if err != nil {
+	if err != nil || !token.Valid {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "Unauthorized",
 		})
 	}
-	_, ok := token.Claims.(*jwt.RegisteredClaims)
+	claims, ok := token.Claims.(*jwt.MapClaims)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "Unauthorized",
 		})
 	}
+	fmt.Println(claims)
 	return c.Next()
 }
 
@@ -74,6 +75,12 @@ func main() {
 	app := fiber.New()
 
 	app.Use("/books", authenticationRequired)
+	app.Use("/books/:id", authenticationRequired)
+	app.Use("/search-books", authenticationRequired)
+	app.Use("/update-books/:id", authenticationRequired)
+	app.Use("/update-date-books/:id", authenticationRequired)
+	app.Use("/delete-books/:id", authenticationRequired)
+	app.Use("/force-delete-books/:id", authenticationRequired)
 
 	app.Get("/books", func(c *fiber.Ctx) error {
 		return c.JSON(GetAllBooks(db))
