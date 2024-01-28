@@ -49,7 +49,7 @@ func main() {
 
 	app := fiber.New()
 
-	db.AutoMigrate(&Book{})
+	db.AutoMigrate(&Book{}, &User{})
 	fmt.Println("Migrated! Successfully!")
 
 	app.Get("/books", func(c *fiber.Ctx) error {
@@ -131,6 +131,19 @@ func main() {
 		}
 		ForceDeleteBook(db, uint(id))
 		return c.SendStatus(200)
+	})
+
+	// User APIs
+	app.Post("/users", func(c *fiber.Ctx) error {
+		user := new(User)
+		if err := c.BodyParser(user); err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		err := createUser(db, user)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		return c.JSON(user)
 	})
 
 	app.Listen(":8080")
