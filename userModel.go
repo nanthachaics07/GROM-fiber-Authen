@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"time"
 
@@ -40,14 +41,15 @@ func LoginUser(db *gorm.DB, user *User) (string, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(selectedUser.Password),
 		[]byte(user.Password))
 	if err != nil {
+		log.Printf("Password does not match : %v", err)
 		return "", err
 	}
 	// generate token
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"email": selectedUser.Email,
-			"exp":   time.Now().Add(time.Hour * 72).Unix(),
+			"user_id": selectedUser.ID,
+			"exp":     time.Now().Add(time.Hour * 72).Unix(),
 		})
 	tokenString, err := token.SignedString([]byte(jwtSecretKey))
 	if err != nil {

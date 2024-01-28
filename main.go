@@ -147,6 +147,22 @@ func main() {
 		return c.JSON(user)
 	})
 
+	app.Post("/login", func(c *fiber.Ctx) error {
+		user := new(User)
+		if err := c.BodyParser(user); err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		token, err := LoginUser(db, user)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		fmt.Println("User logged in successfully")
+		return c.JSON(map[string]string{
+			"message": "User logged in successfully",
+			"token":   token,
+		})
+	})
+
 	app.Listen(":8080")
 
 	// CreateBook(db, &Book{
