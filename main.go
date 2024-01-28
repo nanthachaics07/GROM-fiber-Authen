@@ -134,7 +134,7 @@ func main() {
 	})
 
 	// User APIs
-	app.Post("/users", func(c *fiber.Ctx) error {
+	app.Post("/register", func(c *fiber.Ctx) error {
 		user := new(User)
 		if err := c.BodyParser(user); err != nil {
 			return c.Status(500).SendString(err.Error())
@@ -143,6 +143,7 @@ func main() {
 		if err != nil {
 			return c.Status(500).SendString(err.Error())
 		}
+		fmt.Println("User created successfully")
 		return c.JSON(user)
 	})
 
