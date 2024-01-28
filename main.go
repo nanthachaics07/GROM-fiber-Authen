@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -53,6 +54,49 @@ func main() {
 
 	app.Get("/books", func(c *fiber.Ctx) error {
 		return c.JSON(GetAllBooks(db))
+	})
+
+	app.Get("/books/:id", func(c *fiber.Ctx) error {
+		id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		return c.JSON(GetBook(db, uint(id)))
+	})
+
+	app.Get("/search-books", func(c *fiber.Ctx) error {
+		name := c.Query("name")
+		return c.JSON(SearchBook(db, name))
+	})
+
+	app.Post("/update-books", func(c *fiber.Ctx) error {
+		book := new(Book)
+		if err := c.BodyParser(book); err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		err := CreateBook(db, book)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		return c.JSON(book)
+	})
+
+	app.Delete("/delete-books/:id", func(c *fiber.Ctx) error {
+		id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		DeleteBook(db, uint(id))
+		return c.SendStatus(200)
+	})
+
+	app.Delete("/force-delete-books/:id", func(c *fiber.Ctx) error {
+		id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		ForceDeleteBook(db, uint(id))
+		return c.SendStatus(200)
 	})
 
 	app.Listen(":8080")

@@ -9,18 +9,19 @@ import (
 
 type Book struct {
 	gorm.Model
-	Name        string
-	Author      string
-	Description string
-	Peice       int
+	Name        string `json:"name"`
+	Author      string `json:"author"`
+	Description string `json:"description"`
+	Peice       int    `json:"peice"`
 }
 
-func CreateBook(db *gorm.DB, book *Book) {
+func CreateBook(db *gorm.DB, book *Book) error {
 	result := db.Create(book)
 	if result.Error != nil {
 		log.Fatalf("Error creating book: %v", result.Error)
 	}
 	fmt.Println("Book created successfully")
+	return nil
 }
 
 func GetBook(db *gorm.DB, id uint) *Book {
@@ -53,6 +54,15 @@ func DeleteBook(db *gorm.DB, id uint) {
 	var book Book
 	// result := db.Unscoped().Delete(&book, id)
 	result := db.Delete(&book, id)
+	if result.Error != nil {
+		log.Fatalf("Error deleting book: %v", result.Error)
+	}
+	fmt.Println("Book deleted successfully")
+}
+
+func ForceDeleteBook(db *gorm.DB, id uint) {
+	var book Book
+	result := db.Unscoped().Delete(&book, id)
 	if result.Error != nil {
 		log.Fatalf("Error deleting book: %v", result.Error)
 	}
