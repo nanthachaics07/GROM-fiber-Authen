@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -20,6 +21,26 @@ const (
 	password = "mypassword"
 	dbname   = "mydatabase"
 )
+
+func authenticationRequired(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+	token, err := jwt.ParseWithClaims(cookie, &jwt.RegisteredClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+		})
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Unauthorized",
+		})
+	}
+	_, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Unauthorized",
+		})
+	}
+	return c.Next()
+}
 
 func main() {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
@@ -47,10 +68,12 @@ func main() {
 	}
 	defer sqlDB.Close()
 
-	app := fiber.New()
-
 	db.AutoMigrate(&Book{}, &User{})
 	fmt.Println("Migrated! Successfully!")
+
+	app := fiber.New()
+
+	app.Use("/books", authenticationRequired)
 
 	app.Get("/books", func(c *fiber.Ctx) error {
 		return c.JSON(GetAllBooks(db))
@@ -156,10 +179,17 @@ func main() {
 		if err != nil {
 			return c.Status(500).SendString(err.Error())
 		}
-		fmt.Println("User logged in successfully")
+
+		c.Cookie(&fiber.Cookie{
+			Name:     "jwt",
+			Value:    token,
+			Expires:  time.Now().Add(time.Hour * 24),
+			HTTPOnly: true,
+		})
+		// fmt.Println("User logged in successfully")
 		return c.JSON(map[string]string{
 			"message": "User logged in successfully",
-			"token":   token,
+			"token":   "Your token is: " + token,
 		})
 	})
 
